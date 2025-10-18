@@ -42,10 +42,3 @@ function TPBVP(n::Int, m::int, f::Function, x0::Vector{Float64}, xT::Vector{Floa
     new(n, m, f, x0, xT, tspan, N, zeros(n, N), zeros(m, N), 0)
 end
 
-
-"""
-Solve the TPBVP using Ipopt
-"""
-function baseline_solver(prob::TPBVP)
-
-end

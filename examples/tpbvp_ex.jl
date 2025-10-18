@@ -16,6 +16,9 @@ include("../src/utils.jl")
 include("../src/tasks/navigation.jl")
 include("../src/sensors/gps.jl")
 include("../src/sensors/touch.jl")
+include("../models.jl")
+include("../src/solve.jl")
+#include("../src/problems/planning_problem.jl")
 
 # Usings 
 
@@ -31,32 +34,34 @@ include("../src/sensors/touch.jl")
 add_obstacles!(𝒲, 𝒪)
 
 # Define the robot with a navigation task
-x0 = [0.0, 0.0]
-xg1 = [4.0, 3.0]
-xg2 = [2.0, 4.0]
+x0 = [0.0, 0.0, 0.0]
+xg1 = [4.0, 3.0, 0.0]
 
-R = robot(x0, 2, 2, circle([0.0, 0.0], 0.1))
+# Define robot and it's constraints
+R = robot(x0, 3, 2, circle([0.0, 0.0], 0.1))
+add_dynamics!(R, unicycle!)
 
+# Define robot tasks
 nav_task_1 = navigation_task(xg1)
-nav_task_2 = navigation_task(xg2)
-add_tasks!(R, [nav_task_1, nav_task_2])
-
-gps = create_gps(1:2)
-touch_sensor = create_touch_sensor()
-add_sensors!(R, [gps, touch_sensor])
-
-add_robots!(𝒲, [R])
-
+add_tasks!(R, [nav_task_1])
 
 # Configure the planning algorithm
+# rrt = RRT()
+# add_planner!(R, rrt)
 
+# Add robot(s) to the simulation
+#add_robots!(𝒲, [R])
 
+# Define the planning problem 
+# prob = PlanningProblem(𝒲, (0.0, 1.0), 0.01)
 
-# Collect information for the simulation
+# # Solve the problem
+# sol = solve(prob)
+
 
 
 
 
 
 # Plot 
-plot(𝒲)
+# plot(𝒲)

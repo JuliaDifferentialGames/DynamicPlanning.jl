@@ -16,7 +16,7 @@ abstract type AbstractTask end
 """
 Base task type
 """
-mutable struct BaseTask
+mutable struct BaseTask <: AbstractTask
     id::Int 
     priority::Int 
     deadline::Float64 

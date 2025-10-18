@@ -8,7 +8,9 @@ Resources Used:
 - Principles of Robotic Motion by Choset et al
 """
 
-# Imports 
+# Includes
+include("planning_algorithms/planning.jl")
+include("tasks/task.jl")
 
 # Usings 
 using LazySets
@@ -18,7 +20,7 @@ using Polyhedra
 Base robot type 
 """
 mutable struct Robot
-    x0::Vector                      # Initial state
+    x0::AbstractVector                    # Initial state
     n::Int                          # State dimension
     m::Int                          # Control dimension
     shape::Any                      # Robot set shape
@@ -30,7 +32,37 @@ mutable struct Robot
     U::Vector                       # Control along trajectory
     tasks::Vector                   # Task set
     sensors::Vector                 # Sensors
+    planners::Dict                  # Planers
+    Id::Int8                        # Robot ID Number
 end
+
+
+# mutable struct Robot{
+#     T<:AbstractVector,   # state vector type (e.g. SVector)
+#     D<:Function,         # dynamics function type
+#     G<:Function,         # observation function type
+#     S<:LazySet,          # shape type
+#     P,                   # parameter type
+#     C<:AbstractVector,   # constraint container type
+#     TaskT<:AbstractTask, # task type (or union)
+#     PlanT<:AbstractPlanner
+# }
+#     x0::T
+#     n::Int
+#     m::Int
+#     shape::S
+#     observation::G
+#     dynamics::D
+#     p::P
+#     constraints::C
+#     X::Vector{T}
+#     U::Vector
+#     tasks::Vector{TaskT}
+#     sensors::Vector  # You may also parametrize this
+#     planners::Dict{DataType, PlanT}
+#     Id::Int8
+# end
+
 
 """
 Robot constructor
@@ -42,7 +74,7 @@ function robot(x0::Vector, n::Int, m::Int, shape::Any; observation=(x, u, p, t)-
     @assert isa(shape, LazySet) "robot shape must be a LazySet"
 
     # Create the robot
-    Robot(x0, n, m, shape, observation, (x, u, p, t)->u,  p, [], [x0], [], [], [])
+    Robot(x0, n, m, shape, observation, (x, u, p, t)->u,  p, [], [x0], [], [], [], [], 0)
 end 
 
 # ======================================================================================= #
@@ -52,11 +84,28 @@ end
 """
 Method for adding tasks to the robot
 """
-function add_tasks!(robot::Robot, task_vec)
-    push!(robot.tasks, task_vec...)
+function add_tasks!(robot::Robot, tasks::Vector{AbstractTask})
+    push!(robot.tasks, tasks...)
     return robot
 end
 
+
+"""
+Method to add a planner for a specific task
+"""
+function add_planner!(robot::Robot, planner)
+    robot.planners[planner.type] = planner
+    return robot
+end
+
+
+"""
+Adds new tasks to an existing problem
+"""
+function update_tasks!(problem::PlanningProblem, id::Int8, tasks::Vector{AbstractTask})
+    # Access the robot and update the tasks
+    return add_tasks!(problem.workspace.robots[id], tasks)
+end
 
 
 # ======================================================================================= #
@@ -98,7 +147,8 @@ end
 Adds dynamics constraints to a robot
 """
 function add_dynamics!(robot::Robot, f::Function)
-    return "TODO"
+    robot.dynamics = f;
+    return robot
 end
 
 
