@@ -1,0 +1,118 @@
+"""
+Author: Bennet Outland
+Organization: CU Boulder
+Information Control: None - University Product
+License: MIT
+
+Resources Used:
+- Principles of Robotic Motion by Choset et al
+"""
+
+# Imports 
+
+# Usings 
+using LazySets
+using Polyhedra
+
+"""
+Base robot type 
+"""
+mutable struct Robot
+    x0::Vector                      # Initial state
+    n::Int                          # State dimension
+    m::Int                          # Control dimension
+    shape::Any                      # Robot set shape
+    observation::Function           # Observation function
+    dynamics::Function              # Dynamics function
+    p::Any                          # Parameters
+    constraints::Vector             # Constraints   
+    X::Vector                       # Trajectory
+    U::Vector                       # Control along trajectory
+    tasks::Vector                   # Task set
+    sensors::Vector                 # Sensors
+end
+
+"""
+Robot constructor
+"""
+function robot(x0::Vector, n::Int, m::Int, shape::Any; observation=(x, u, p, t)->x, p = nothing) 
+    # Checking 
+    @assert isa(observation, Function) "observation must be a function of form: g(x, u, p, t)"
+    @assert n == length(x0) "initial condition is not the correct size"
+    @assert isa(shape, LazySet) "robot shape must be a LazySet"
+
+    # Create the robot
+    Robot(x0, n, m, shape, observation, (x, u, p, t)->u,  p, [], [x0], [], [], [])
+end 
+
+# ======================================================================================= #
+#                                    Task Addition
+# ======================================================================================= #
+
+"""
+Method for adding tasks to the robot
+"""
+function add_tasks!(robot::Robot, task_vec)
+    push!(robot.tasks, task_vec...)
+    return robot
+end
+
+
+
+# ======================================================================================= #
+#                                    Sensor Addition
+# ======================================================================================= #
+
+"""
+Method for adding sensors to the robot
+"""
+function add_sensors!(robot::Robot, sensor_vec)
+    push!(robot.sensors, sensor_vec...)
+    return robot
+end
+
+
+# ======================================================================================= #
+#                                    Robot Constraints
+# ======================================================================================= #
+
+"""
+Adds a general constraint to a robot
+"""
+function add_constraint!(robot::Robot, C::Function, type::Symbol)
+    if type == :equality
+        robot = equality_constraint(robot, C, type)
+    elseif type ==:inequality
+        println(">=")
+    elseif type == :soc
+        println("soc")
+    else
+        ArgumentError("constraint type not defined")
+    end
+
+    return robot
+end
+
+
+"""
+Adds dynamics constraints to a robot
+"""
+function add_dynamics!(robot::Robot, f::Function)
+    return "TODO"
+end
+
+
+# ======================================================================================= #
+#                          Constraint Assignment Functions
+# ======================================================================================= #
+
+function equality_constraint(robot::Robot, C::Function, type::Symbol)
+    # Define the Euclidean projection TODO?
+
+    # Create the constraint
+    c = Constraint(C, type)
+
+    # Mutate and return the player
+    push!(robot.constraints, c)
+    return robot
+end

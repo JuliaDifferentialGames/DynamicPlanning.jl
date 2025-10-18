@@ -1,0 +1,68 @@
+"""
+Author: Bennet Outland
+Organization: CU Boulder
+Information Control: None - University Product
+License: MIT
+
+Resources Used:
+- Principles of Robotic Motion by Choset et al
+"""
+
+# Includes 
+include("../src/workspace.jl")
+
+# Usings 
+using Plots 
+using LaTeXStrings
+
+
+
+
+subscripts = Dict(
+    '0'=>'₀', '1'=>'₁', '2'=>'₂', '3'=>'₃', '4'=>'₄',
+    '5'=>'₅', '6'=>'₆', '7'=>'₇', '8'=>'₈', '9'=>'₉'
+)
+
+function subscript_digits(n::Integer)
+    return join(subscripts[d] for d in string(n))
+end
+
+"""
+Workspace plotting function
+"""
+function plot(workspace::Workspace, label=true, text_sizes=[7, 5])
+    # Default plot function
+    p = Plots.plot(aspectratio=1)
+
+    # Plot the workspace
+    plot!(p, workspace.bounds, c=:white)
+
+    # Plot the obstacles 
+    for (i, obstacle) ∈ enumerate(workspace.obstacles)
+        plot!(p, obstacle, c=:grey)
+        if label
+            center = LazySets.center(obstacle)
+            annotate!(p, center[1], center[2], text(L"\mathcal{WO}" * LaTeXString(subscript_digits(i)), text_sizes[1]))
+        end
+    end
+
+    # Plot robot related stuff
+    for (i, robot) ∈ enumerate(workspace.robots)
+        # Nav goals 
+        
+
+        # Terminal state
+        plot!(p, robot.shape)
+        if label
+            center = robot.X[end]
+            annotate!(p, center[1], center[2], text(LaTeXString("$i"), text_sizes[2]))
+        end
+    end
+
+
+    plot!(p, xlims=:auto, ylims=:auto)
+
+
+    return p
+
+end
