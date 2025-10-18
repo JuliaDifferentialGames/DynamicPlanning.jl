@@ -17,7 +17,7 @@ This is a work in progress library for warm-starting differential games via kino
 3. Define the sample game/games
 4. Implement IBR
 5. Create the potential function and type
-6. Determine a the planning/games loop
+6. Determine the planning/games loop
 
 
 ## Example
