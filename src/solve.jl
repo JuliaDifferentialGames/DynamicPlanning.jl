@@ -10,6 +10,7 @@ Resources Used:
 
 # Includes 
 include("problems/planning_problem.jl")
+include("tasks/task_handler.jl")
 
 # Usings
 
@@ -19,11 +20,13 @@ include("problems/planning_problem.jl")
 Simulation 
 """
 function solve(problem::PlanningProblem)
-    # Setup and Set IDs
+    # Setup and Set IDs 
+    for (i, robot) ∈ enumerate(problem.workspace.robots)
+        robot.Id = i
+    end
 
-    # Determine Task Priority 
-
-    # Allocate to planners
+    # Break down into sub-problems
+    problem_queue = task_handler(problem)
 
     # Simulation loop
     max_iters = 42

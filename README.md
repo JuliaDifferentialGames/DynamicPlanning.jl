@@ -20,6 +20,20 @@ This is a work in progress library for warm-starting differential games via kino
 6. Determine the planning/games loop
 
 
+## Testing Plan
+
+1. Solve a TPBVP
+2. Solve for two robots
+3. Update the task and solve two TPBVPs
+4. Solve a TPBVP via KinoRRTStar
+5. Determine the reachable sets of the players
+6. Verify the sampling strategy
+7. Run the potential game in an open map
+8. Create a custom task
+9. Test the loop with just navigation
+10. Add in potential game
+
+
 ## Example
 
 This example will be used for a final project in ASEN 5254: Algorithmic Motion Planning at CU Boulder. 

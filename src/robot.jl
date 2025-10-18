@@ -20,7 +20,7 @@ using Polyhedra
 Base robot type 
 """
 mutable struct Robot
-    x0::AbstractVector                    # Initial state
+    x0::AbstractVector              # Initial state
     n::Int                          # State dimension
     m::Int                          # Control dimension
     shape::Any                      # Robot set shape
@@ -30,7 +30,7 @@ mutable struct Robot
     constraints::Vector             # Constraints   
     X::Vector                       # Trajectory
     U::Vector                       # Control along trajectory
-    tasks::Vector                   # Task set
+    tasks::Vector{AbstractTask}      # Task set
     sensors::Vector                 # Sensors
     planners::Dict                  # Planers
     Id::Int8                        # Robot ID Number
@@ -74,7 +74,7 @@ function robot(x0::Vector, n::Int, m::Int, shape::Any; observation=(x, u, p, t)-
     @assert isa(shape, LazySet) "robot shape must be a LazySet"
 
     # Create the robot
-    Robot(x0, n, m, shape, observation, (x, u, p, t)->u,  p, [], [x0], [], [], [], [], 0)
+    Robot(x0, n, m, shape, observation, (x, u, p, t)->u,  p, [], [x0], [], [], [], Dict(), 0)
 end 
 
 # ======================================================================================= #
@@ -84,8 +84,8 @@ end
 """
 Method for adding tasks to the robot
 """
-function add_tasks!(robot::Robot, tasks::Vector{AbstractTask})
-    push!(robot.tasks, tasks...)
+function add_tasks!(robot::Robot, tasks::AbstractVector{T}) where {T <: AbstractTask}
+    append!(robot.tasks, tasks)
     return robot
 end
 
@@ -99,13 +99,13 @@ function add_planner!(robot::Robot, planner)
 end
 
 
-"""
-Adds new tasks to an existing problem
-"""
-function update_tasks!(problem::PlanningProblem, id::Int8, tasks::Vector{AbstractTask})
-    # Access the robot and update the tasks
-    return add_tasks!(problem.workspace.robots[id], tasks)
-end
+# """
+# Adds new tasks to an existing problem
+# """
+# function update_tasks!(problem::PlanningProblem, id::Int8, tasks::Vector{AbstractTask})
+#     # Access the robot and update the tasks
+#     return add_tasks!(problem.workspace.robots[id], tasks)
+# end
 
 
 # ======================================================================================= #

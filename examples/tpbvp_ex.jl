@@ -16,7 +16,7 @@ include("../src/utils.jl")
 include("../src/tasks/navigation.jl")
 include("../src/sensors/gps.jl")
 include("../src/sensors/touch.jl")
-include("../models.jl")
+include("../src/models.jl")
 include("../src/solve.jl")
 #include("../src/problems/planning_problem.jl")
 
@@ -53,10 +53,10 @@ add_tasks!(R, [nav_task_1])
 #add_robots!(𝒲, [R])
 
 # Define the planning problem 
-# prob = PlanningProblem(𝒲, (0.0, 1.0), 0.01)
+prob = PlanningProblem(𝒲, (0.0, 1.0), 0.01)
 
-# # Solve the problem
-# sol = solve(prob)
+# Solve the problem
+sol = solve(prob)
 
 
 

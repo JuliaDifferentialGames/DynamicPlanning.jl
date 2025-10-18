@@ -20,13 +20,14 @@ mutable struct PlanningProblem
     workspace::Workspace
     tspan::Tuple
     dt::Float64
+    t::Float
 end
 
 """
 Constructor for a planning problem
 """
 function PlanningProblem(workspace::Workspace, tspan::Tuple, dt::Float64)
-    return PlanningProblem(workspace, tspan, dt)
+    return PlanningProblem(workspace, tspan, dt, 0.0)
 end
 
 """
