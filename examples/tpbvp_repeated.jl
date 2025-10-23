@@ -20,13 +20,12 @@ include("../src/models.jl")
 include("../src/solve.jl")
 #include("../src/problems/planning_problem.jl")
 include("../src/planning_algorithms/PassThrough.jl")
-include("../src/planning_algorithms/KinoFMTStar.jl")
 
 # Usings 
 
 
 # Define the workspace
-𝒲 = workspace([2, 2], 3.0)
+𝒲 = workspace(-2, 7, -2, 7)
 
 # Define and add obstacles 
 𝒪 = [
@@ -38,6 +37,7 @@ add_obstacles!(𝒲, 𝒪)
 # Define the robot with a navigation task
 x0 = [0.0, 0.0, 0.0]
 xg1 = [4.0, 3.0, 0.0]
+xg2 = [2.0, 3.0, 0.0]
 
 # Define robot and it's constraints
 R = robot(x0, 3, 2, circle([0.0, 0.0], 0.1))
@@ -48,8 +48,8 @@ nav_task_1 = navigation_task(xg1)
 add_tasks!(R, [nav_task_1])
 
 # Configure the planning algorithm
-fmt = KinoFMTStar()
-add_planner!(R, fmt)
+pt = PassThrough()
+add_planner!(R, pt)
 
 # Add robot(s) to the simulation
 add_robots!(𝒲, [R])
@@ -60,6 +60,11 @@ prob = PlanningProblem(𝒲, (0.0, 1.0), 0.01)
 # Solve the problem
 sol = solve!(prob)
 
+# Add a new task to the existing problem 
+nav_task_2 = navigation_task(xg2)
+update_tasks!(prob, 1, [nav_task_2])
+
+new_sol = solve!(prob)
+
 # Plot 
-# plot(𝒲)
-plot(prob, sol)
+plot(prob, new_sol)

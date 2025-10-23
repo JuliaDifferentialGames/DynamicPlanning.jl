@@ -51,6 +51,20 @@ function workspace(center, radius)
     end
 end
 
+
+"""
+Overloaded workspace constructor for a rectangular workspace
+"""
+function workspace(x_min, x_max, y_min, y_max)
+    # Check if it is a viable set 
+   
+    hr = Hyperrectangle(low=[x_min, y_min], high=[x_max, y_max])
+    return Workspace(hr, [], [])
+
+end
+
+
+
 """
 Add obstacles to the workspace
 """

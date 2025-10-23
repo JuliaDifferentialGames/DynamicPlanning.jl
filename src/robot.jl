@@ -99,13 +99,13 @@ function add_planner!(robot::Robot, planner)
 end
 
 
-# """
-# Adds new tasks to an existing problem
-# """
-# function update_tasks!(problem::PlanningProblem, id::Int8, tasks::Vector{AbstractTask})
-#     # Access the robot and update the tasks
-#     return add_tasks!(problem.workspace.robots[id], tasks)
-# end
+"""
+Adds new tasks to an existing problem
+"""
+function update_tasks!(problem::PlanningProblem, id::Int64, tasks::AbstractVector{T}) where {T <: AbstractTask}
+    # Access the robot and update the tasks
+    return add_tasks!(problem.workspace.robots[id], tasks)
+end
 
 
 # ======================================================================================= #

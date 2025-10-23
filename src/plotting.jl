@@ -41,10 +41,10 @@ function plot(workspace::Workspace, label=true, text_sizes=[7, 5])
     # Plot the obstacles 
     for (i, obstacle) ∈ enumerate(workspace.obstacles)
         plot!(p, obstacle, c=:grey)
-        if label
-            center = LazySets.center(obstacle)
-            annotate!(p, center[1], center[2], text(L"\mathcal{WO}" * LaTeXString(subscript_digits(i)), text_sizes[1]))
-        end
+        # if label
+        #     center = chebyshevcenter(obstacle)#LazySets.center(obstacle)
+        #     annotate!(p, center[1], center[2], text(L"\mathcal{WO}" * LaTeXString(subscript_digits(i)), text_sizes[1]))
+        # end
     end
 
     # Plot robot related stuff
@@ -81,15 +81,15 @@ function plot(problem::PlanningProblem, solution::Solution, label=true, text_siz
     workspace = problem.workspace
 
     # Plot the workspace
-    plot!(p, workspace.bounds, c=:white)
+    #plot!(p, workspace.bounds, c=:white)
 
     # Plot the obstacles 
     for (i, obstacle) ∈ enumerate(workspace.obstacles)
         plot!(p, obstacle, c=:grey)
-        if label
-            center = LazySets.center(obstacle)
-            annotate!(p, center[1], center[2], text(L"\mathcal{WO}" * LaTeXString(subscript_digits(i)), text_sizes[1]))
-        end
+        # if label
+        #     center = LazySets.center(obstacle)
+        #     annotate!(p, center[1], center[2], text(L"\mathcal{WO}" * LaTeXString(subscript_digits(i)), text_sizes[1]))
+        # end
     end
 
     # Plot robot related stuff

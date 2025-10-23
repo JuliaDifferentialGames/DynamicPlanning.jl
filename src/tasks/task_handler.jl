@@ -46,13 +46,20 @@ function task_handler(problem)
 
         # Populate the queue and create problems
         for (task_id, task) ∈ enumerate(robot.tasks)
+            println("Populating Robot ", 1, " Task: ", task_id )
             # Add the task to the queue via an id
             push!(pq, task_id => task.base.priority)
 
             # Create a problem from the task
             if task isa NavigationTask
+                # Determine the starting location 
+                x_init = robot.x0 
+                if length(robot.X) != 0
+                    x_init = robot.X[end]
+                end
+
                 # Make a TPBVP 
-                prob = TPBVP(robot.n, robot.m, robot.dynamics, robot.x0, task.goal, (0.0, task.base.deadline), 10) # Might need to change x0, timespan, and N
+                prob = TPBVP(robot.n, robot.m, robot.dynamics, x_init, task.goal, (0.0, task.base.deadline), 10) # Might need to change x0, timespan, and N
 
                 # Map the problem to a solver as a subproblem and put into a dictionary
                 sub_prob_dict[task_id] = PlanningSubProblem(prob, robot.planners["TPBVP"])

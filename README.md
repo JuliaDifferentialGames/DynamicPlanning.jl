@@ -23,8 +23,8 @@ This is a work in progress library for warm-starting differential games via kino
 ## Testing Plan
 
 1. Solve a TPBVP [Done]
-2. Solve for two robots
-3. Update the task and solve two TPBVPs
+2. Solve for two robots [Done]
+3. Update the task and solve two TPBVPs [Done]
 4. Solve a TPBVP via KinoFMTStar
 5. Determine the reachable sets of the players
 6. Verify the sampling strategy
