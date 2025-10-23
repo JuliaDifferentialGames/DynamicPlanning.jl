@@ -19,6 +19,7 @@ include("../src/sensors/touch.jl")
 include("../src/models.jl")
 include("../src/solve.jl")
 #include("../src/problems/planning_problem.jl")
+include("../src/planning_algorithms/PassThrough.jl")
 
 # Usings 
 
@@ -46,22 +47,18 @@ nav_task_1 = navigation_task(xg1)
 add_tasks!(R, [nav_task_1])
 
 # Configure the planning algorithm
-# rrt = RRT()
-# add_planner!(R, rrt)
+pt = PassThrough()
+add_planner!(R, pt)
 
 # Add robot(s) to the simulation
-#add_robots!(𝒲, [R])
+add_robots!(𝒲, [R])
 
 # Define the planning problem 
 prob = PlanningProblem(𝒲, (0.0, 1.0), 0.01)
 
 # Solve the problem
-sol = solve(prob)
-
-
-
-
-
+sol = solve!(prob)
 
 # Plot 
 # plot(𝒲)
+plot(prob, sol)

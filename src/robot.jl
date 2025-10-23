@@ -94,7 +94,7 @@ end
 Method to add a planner for a specific task
 """
 function add_planner!(robot::Robot, planner)
-    robot.planners[planner.type] = planner
+    robot.planners[planner.type] = planner.base.planner
     return robot
 end
 

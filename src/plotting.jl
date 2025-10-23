@@ -10,6 +10,7 @@ Resources Used:
 
 # Includes 
 include("../src/workspace.jl")
+include("problems/planning_problem.jl")
 
 # Usings 
 using Plots 
@@ -55,6 +56,57 @@ function plot(workspace::Workspace, label=true, text_sizes=[7, 5])
         plot!(p, robot.shape)
         if label
             center = robot.X[end]
+            annotate!(p, center[1], center[2], text(LaTeXString("$i"), text_sizes[2]))
+        end
+    end
+
+
+    plot!(p, xlims=:auto, ylims=:auto)
+
+
+    return p
+
+end
+
+
+
+"""
+Solution plotting function
+"""
+function plot(problem::PlanningProblem, solution::Solution, label=true, text_sizes=[7, 5])
+    # Default plot function
+    p = Plots.plot(aspectratio=1)
+
+    # Get the workspace 
+    workspace = problem.workspace
+
+    # Plot the workspace
+    plot!(p, workspace.bounds, c=:white)
+
+    # Plot the obstacles 
+    for (i, obstacle) ∈ enumerate(workspace.obstacles)
+        plot!(p, obstacle, c=:grey)
+        if label
+            center = LazySets.center(obstacle)
+            annotate!(p, center[1], center[2], text(L"\mathcal{WO}" * LaTeXString(subscript_digits(i)), text_sizes[1]))
+        end
+    end
+
+    # Plot robot related stuff
+    for (i, robot) ∈ enumerate(workspace.robots)
+        # Nav goals 
+        # Get xs and ys 
+        xs = [robot.X[i][1] for i ∈ eachindex(robot.X)]
+        ys = [robot.X[i][2] for i ∈ eachindex(robot.X)]
+        
+        scatter!([robot.X[1][1]], [robot.X[1][2]], label=nothing, color=i)
+        plot!(xs, ys, label="Path", color=i) 
+        
+
+        # Terminal state
+        plot!(p, robot.shape, color=i)
+        if label
+            center = problem.workspace.robots[i].X[end]
             annotate!(p, center[1], center[2], text(LaTeXString("$i"), text_sizes[2]))
         end
     end

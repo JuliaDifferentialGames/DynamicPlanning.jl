@@ -20,7 +20,7 @@ mutable struct PlanningProblem
     workspace::Workspace
     tspan::Tuple
     dt::Float64
-    t::Float
+    t::Float64
 end
 
 """
