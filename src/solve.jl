@@ -40,7 +40,7 @@ function solve!(problem::PlanningProblem)
         println("Solving Robot ", i, " Task: ", prob_id )
 
         prob_info = problem_queue.problem_dict[i][prob_id]
-        sol = prob_info.solver(prob_info.problem)
+        sol = prob_info.solver.base.planner(prob_info.problem, prob_info.solver)
 
         # Remove the completed task from the queue and from problem object
         delete!(problem_queue.queue[i], prob_id)

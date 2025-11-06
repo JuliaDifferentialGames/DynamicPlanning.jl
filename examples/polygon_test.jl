@@ -22,18 +22,19 @@ include("../src/solve.jl")
 include("../src/planning_algorithms/PassThrough.jl")
 
 # Usings 
+using LaTeXStrings
 
 
 # Define the workspace
-𝒲 = workspace(-2, 7, -2, 7)
+# 𝒲 = workspace(-2, 7, -2, 7)
+𝒲 = workspace([0.0, 0.0], 10.0)
 
 
 # Define and add obstacles 
-𝒪 = [
-    Ellipsoid([1.0, 1.0], [0.25 0; 0 0.5]),
-    Ellipsoid([3.0, 2.0], [0.25 0; 0 0.25]), 
-    random_polygon(𝒲)
-] 
+𝒪 = create_pursuit_evasion_obstacles(𝒲)
+
 add_obstacles!(𝒲, 𝒪)
 
 plot(𝒲)
+xlabel!(L"x")
+ylabel!(L"y")

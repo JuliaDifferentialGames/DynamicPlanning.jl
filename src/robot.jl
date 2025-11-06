@@ -11,6 +11,7 @@ Resources Used:
 # Includes
 include("planning_algorithms/planning.jl")
 include("tasks/task.jl")
+include("constraints.jl")
 
 # Usings 
 using LazySets
@@ -30,7 +31,7 @@ mutable struct Robot
     constraints::Vector             # Constraints   
     X::Vector                       # Trajectory
     U::Vector                       # Control along trajectory
-    tasks::Vector{AbstractTask}      # Task set
+    tasks::Vector{AbstractTask}     # Task set
     sensors::Vector                 # Sensors
     planners::Dict                  # Planers
     Id::Int8                        # Robot ID Number
@@ -94,7 +95,7 @@ end
 Method to add a planner for a specific task
 """
 function add_planner!(robot::Robot, planner)
-    robot.planners[planner.type] = planner.base.planner
+    robot.planners[planner.type] = planner #planner.base.planner
     return robot
 end
 
@@ -164,5 +165,30 @@ function equality_constraint(robot::Robot, C::Function, type::Symbol)
 
     # Mutate and return the player
     push!(robot.constraints, c)
+    return robot
+end
+
+# """
+# Adds box constraints 
+# """
+# function add_box_constraint!(robot::Robot, lower::Vector, upper::Vector)
+#     # Form each constraint
+#     constraints = []
+#     for i ∈ eachindex(lower) 
+#         push!(constraints, Constraint((x, u) -> lower[i] - u[i], :ineq))
+#         push!(constraints, Constraint((x, u) -> u[i] - upper[i], :ineq))
+#     end
+
+#     # Mutate and return the player
+#     push!(robot.constraints, constraints...)
+#     return robot
+# end
+
+"""
+Adds box constraints 
+"""
+function add_box_constraint!(robot::Robot, lower::Vector, upper::Vector, type::Symbol)
+    # Mutate and return the player
+    push!(robot.constraints, BoxConstraint(upper, lower, type))
     return robot
 end

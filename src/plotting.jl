@@ -60,8 +60,12 @@ function plot(workspace::Workspace, label=true, text_sizes=[7, 5])
         end
     end
 
+    # Get bounds 
+    box = box_approximation(workspace.bounds)
+    l = low(box)
+    h = high(box)
 
-    plot!(p, xlims=:auto, ylims=:auto)
+    plot!(p, xlims=[l[1], h[1]], ylims=[l[2], h[2]])
 
 
     return p

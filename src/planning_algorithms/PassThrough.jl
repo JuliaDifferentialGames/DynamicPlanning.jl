@@ -35,7 +35,7 @@ function PassThrough(; dx=0.05)
 end
 
 
-function pass_through_planner(problem::TPBVP)
+function pass_through_planner(problem::TPBVP, params::PlanningAlgorithm)
     sol = Solution([true], [problem.x0, problem.xT], [zeros(2), zeros(2)], [[]])
 
     return sol

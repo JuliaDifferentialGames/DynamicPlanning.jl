@@ -59,7 +59,7 @@ function task_handler(problem)
                 end
 
                 # Make a TPBVP 
-                prob = TPBVP(robot.n, robot.m, robot.dynamics, x_init, task.goal, (0.0, task.base.deadline), 10) # Might need to change x0, timespan, and N
+                prob = TPBVP(robot, problem.workspace, robot.n, robot.m, robot.dynamics, x_init, task.goal, (0.0, task.base.deadline), 10) # Might need to change x0, timespan, and N
 
                 # Map the problem to a solver as a subproblem and put into a dictionary
                 sub_prob_dict[task_id] = PlanningSubProblem(prob, robot.planners["TPBVP"])

@@ -44,11 +44,11 @@ Generate a random convex polygon with up to `max_sides` vertices,
 scaled so that its area is ≤ `max_area`,
 and ensure it lies entirely within the given `bounds` LazySet.
 """
-function random_polygon(workspace; max_sides::Int=10, max_area::Float64=10.0,
+function random_polygon(bounds; max_sides::Int=10, max_area::Float64=10.0,
                         max_tries::Int=100, seed::Int=0)
 
     seed != 0 && Random.seed!(seed)
-    bounds = workspace.bounds
+    #bounds = workspace.bounds
 
     for attempt in 1:max_tries
         # 1. Randomly choose number of vertices between 3 and max_sides
@@ -84,4 +84,88 @@ function random_polygon(workspace; max_sides::Int=10, max_area::Float64=10.0,
             end
         end
     end
+end
+
+
+"""
+    create_pursuit_evasion_obstacles(;
+        workspace_radius = 10.0,
+        num_obstacles = 8,
+        obstacle_max_sides = 6,
+        obstacle_min_area = 1.0,
+        obstacle_max_area = 5.0,
+        min_obstacle_separation = 2.0,
+        seed = 42
+    )
+
+Create polygonal obstacles for pursuit-evasion scenarios within a circular workspace.
+Uses fixed seed for consistency across runs.
+
+# Arguments
+- `workspace_radius`: Radius of circular workspace centered at origin
+- `num_obstacles`: Number of random polygonal obstacles to generate
+- `obstacle_max_sides`: Maximum number of sides per obstacle polygon
+- `obstacle_min_area`: Minimum area for each obstacle
+- `obstacle_max_area`: Maximum area for each obstacle
+- `min_obstacle_separation`: Minimum distance between obstacle centers
+- `seed`: Random seed for reproducibility (default: 42)
+
+# Returns
+Vector of convex polygonal obstacles (VPolygon)
+"""
+function create_pursuit_evasion_obstacles(workspace;
+    workspace_radius = 10.0,
+    num_obstacles = 15,
+    obstacle_max_sides = 10,
+    obstacle_min_area = 1.0,
+    obstacle_max_area = 5.0,
+    min_obstacle_separation = 2.0,
+    seed = 42
+)
+    
+    # Set seed for consistency
+    Random.seed!(seed)
+    
+    # Generate obstacles in inner region (leave boundary clear)
+    obstacle_region = circle(zeros(2), 0.9 * workspace_radius)
+    
+    obstacles = []
+    obstacle_centers = []
+    
+    for i in 1:num_obstacles
+        max_attempts = 100
+        placed = false
+        
+        for attempt in 1:max_attempts
+            # Generate random polygon
+            poly = random_polygon(obstacle_region; 
+                                 max_sides=obstacle_max_sides,
+                                 max_area=obstacle_max_area,
+                                 max_tries=100,
+                                 seed=0)  # Don't reset seed inside
+            
+            # Check area constraint
+            poly_area = area(poly)
+            if poly_area < obstacle_min_area
+                continue  # Reject if too small
+            end
+            
+            # Check separation from existing obstacles
+            poly_center = mean(vertices_list(poly))
+            
+            if isempty(obstacle_centers) || 
+               all(norm(poly_center - c) >= min_obstacle_separation for c in obstacle_centers)
+                push!(obstacles, poly)
+                push!(obstacle_centers, poly_center)
+                placed = true
+                break
+            end
+        end
+        
+        if !placed
+            @warn "Could not place obstacle $i with required separation after $max_attempts attempts"
+        end
+    end
+    
+    return obstacles
 end

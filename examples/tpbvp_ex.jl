@@ -26,28 +26,29 @@ include("../src/planning_algorithms/KinoFMTStar.jl")
 
 
 # Define the workspace
-𝒲 = workspace([2, 2], 3.0)
+𝒲 = workspace([0.0, 0.0], 10.0)
 
 # Define and add obstacles 
-𝒪 = [
-    Ellipsoid([1.0, 1.0], [0.25 0; 0 0.5]),
-    Ellipsoid([3.0, 2.0], [0.25 0; 0 0.25])
-] 
+𝒪 = create_pursuit_evasion_obstacles(𝒲)
 add_obstacles!(𝒲, 𝒪)
 
 # Define the robot with a navigation task
-x0 = [0.0, 0.0, 0.0]
+x0 = [0.0, -1.0, 0.0]
 xg1 = [4.0, 3.0, 0.0]
 
 # Define robot and it's constraints
 R = robot(x0, 3, 2, circle([0.0, 0.0], 0.1))
 add_dynamics!(R, unicycle!)
+add_box_constraint!(R, [-0.25, -pi/3], [0.25, pi/3], :u)
+add_box_constraint!(R, [-Inf, -Inf, -pi/3], [Inf, Inf, pi/3], :x)
 
 # Define robot tasks
 nav_task_1 = navigation_task(xg1)
 add_tasks!(R, [nav_task_1])
 
 # Configure the planning algorithm
+# pt = PassThrough()
+# add_planner!(R, pt)
 fmt = KinoFMTStar()
 add_planner!(R, fmt)
 

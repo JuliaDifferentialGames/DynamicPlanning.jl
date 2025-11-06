@@ -9,6 +9,8 @@ Resources:
 """
 
 # Includes 
+include("../robot.jl")
+include("../workspace.jl")
 
 
 # Usings 
@@ -16,15 +18,16 @@ using DifferentialEquations
 using Interpolations 
 using LinearAlgebra 
 using Optimization
-#using OptimizationIpopt
 
 
 """
 Structure for defining the parameters of a TPBVP
 """
 mutable struct TPBVP
-    n::Int64               # State dimension
-    m::Int64               # Control dimension
+    robot::Robot         # Robot object
+    workspace::Workspace # Workspace object
+    n::Int64             # State dimension
+    m::Int64             # Control dimension
     f::Function          # Dynamics
     x0::Vector{Float64}  # Initial state
     xT::Vector{Float64}  # Final state
@@ -38,7 +41,7 @@ end
 """
 Constructor for the TPBVP
 """
-function TPBVP(n::Int64, m::Int64, f::Function, x0::Vector{Float64}, xT::Vector{Float64}, tspan::Tuple, N::Int64)
-    return TPBVP(n, m, f, x0, xT, tspan, N, zeros(n, N), zeros(m, N), 0)
+function TPBVP(robot::Robot, workspace::Workspace , n::Int64, m::Int64, f::Function, x0::Vector{Float64}, xT::Vector{Float64}, tspan::Tuple, N::Int64)
+    return TPBVP(robot, workspace, n, m, f, x0, xT, tspan, N, zeros(n, N), zeros(m, N), 0)
 end
 
