@@ -131,73 +131,6 @@ function generate_kinodynamic_samples(
     # Trajectory validation 
     valid(traj) = trajectory_validation(traj, problem, state_lower, state_upper)
     
-    # # Collect samples
-    # samples = KinoNode{T, U}[] 
-
-    # # Always include start
-    # start_node = KinoNode(problem.x0, [0.0])
-    # start_node.cost = 0.0
-    # push!(samples, start_node)
-    
-    # # Sampling settings
-    # sample_count = 1
-    # attempts = 0
-    # max_attempts = params.n_samples * 100  # More generous limit
-    
-    # # Generate N-1 samples (start already added)
-    # while sample_count < params.n_samples && attempts < max_attempts
-    #     attempts += 1
-        
-    #     # Goal biasing
-    #     if rand() < params.goal_bias
-    #         # Sample near goal region
-    #         x_sample = gen_goal()
-    #     else
-    #         # Regular sampling
-    #         x_sample = gen_state()
-    #     end
-        
-    #     # Check if state itself is collision-free
-    #     if !valid([x_sample])
-    #         continue
-    #     end
-        
-    #     # Try one control from this state
-    #     control = gen_ctrl()
-        
-    #     # Simulate forward
-    #     traj, final_state = simulate_forward(
-    #         x_sample, control, problem.f, control_duration
-    #     )
-        
-    #     # Check trajectory collision
-    #     if valid(traj)
-    #         node = KinoNode(final_state, control, control_duration)
-    #         node.trajectory = traj
-    #         push!(samples, node)
-    #         sample_count += 1
-    #     end
-    # end
-    
-    # # Ensure goal region coverage
-    # if sample_count < params.n_samples
-    #     goal_samples = min(ensure_goal_ct, params.n_samples - sample_count)
-    #     for i in 1:goal_samples
-    #         x_sample = gen_goal()
-    #         control = gen_ctrl()
-    #         traj, final_state = simulate_forward(
-    #             x_sample, control, params.f, control_duration
-    #         )
-            
-    #         if collision_fn(traj)
-    #             node = KinoNode(final_state, control, control_duration)
-    #             node.trajectory = traj
-    #             push!(samples, node)
-    #             sample_count += 1
-    #         end
-    #     end
-    # end
-
     # Sampling settings
     sample_count = 1
     attempts = 0
@@ -264,7 +197,9 @@ function generate_kinodynamic_samples(
 end
 
 
-
+"""
+Collision and bound checking
+"""
 function trajectory_validation(traj::Vector, problem::TPBVP, state_lower::Vector, state_upper::Vector)
 
     for state ∈ traj 
@@ -388,7 +323,7 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
     V_open = Vector{KinoNode{T, U}}([start_node])
     V_closed = KinoNode{T, U}[]
     control_duration = 1.0  # TODO make a param
-    V_unvisited = generate_kinodynamic_samples(problem, params, control_duration)
+    V_unvisited = generate_kinodynamic_samples(problem, params, control_duration) # TODO: check against paper repo code to make sure this is done correctly. Also make it parallel. 
 
     
     # Compute connection radius 
@@ -437,7 +372,7 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
             N_x = find_closed_neighbors(params, x, V_closed, r_n)
             
             # Find best kinodynamic connection
-            best_parent = find_best_kinodynamic_parent(problem, params, gen_ctrl, valid, x, N_x, control_duration)
+            best_parent = find_best_kinodynamic_parent(problem, params, gen_ctrl, valid, x, N_x, control_duration) # TODO: look into how good of a job solving the TPBVP is 
             
             if best_parent !== nothing
                 # Update x with connection from best_parent
@@ -541,7 +476,7 @@ function find_best_kinodynamic_parent(
     target::KinoNode{T, U},
     candidates::Vector{KinoNode{T, U}},
     control_duration::Float64;
-    num_control_attempts::Int = 5
+    num_control_attempts::Int = 20
 ) where {T, U}
     
     best_connection = nothing

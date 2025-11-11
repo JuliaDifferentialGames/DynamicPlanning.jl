@@ -19,8 +19,8 @@ include("../src/sensors/touch.jl")
 include("../src/models.jl")
 include("../src/solve.jl")
 #include("../src/problems/planning_problem.jl")
-include("../src/planning_algorithms/PassThrough.jl")
-include("../src/planning_algorithms/KinoFMTStar.jl")
+# include("../src/planning_algorithms/PassThrough.jl")
+include("../src/planning_algorithms/KinoFMTStar/KinoFMTStar.jl")
 
 # Usings 
 
@@ -40,7 +40,7 @@ xg1 = [4.0, 3.0, 0.0]
 R = robot(x0, 3, 2, circle([0.0, 0.0], 0.1))
 add_dynamics!(R, unicycle!)
 add_box_constraint!(R, [-0.25, -pi/3], [0.25, pi/3], :u)
-add_box_constraint!(R, [-Inf, -Inf, -pi/3], [Inf, Inf, pi/3], :x)
+add_box_constraint!(R, [-10, -10, -pi/3], [10, 10, pi/3], :x)
 
 # Define robot tasks
 nav_task_1 = navigation_task(xg1)
