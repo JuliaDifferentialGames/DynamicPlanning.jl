@@ -135,7 +135,7 @@ function solve_tpbvp_informed(
         end
         
         dist = params.distance(final_state, x_goal)
-        traj_cost = control_duration
+        traj_cost = norm(final_state - problem.xT) + norm(control)
         
         if dist < best_distance
             best_distance = dist

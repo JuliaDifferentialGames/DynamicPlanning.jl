@@ -19,6 +19,9 @@ using LinearAlgebra
 using Optimization
 using NearestNeighbors
 using Random
+using Base.Threads
+# using Distributed 
+# addprocs(4) 
 
 
 # Base Includes 
@@ -65,7 +68,7 @@ end
 """
 PassThrough Constructor
 """
-function KinoFMTStar(; n_samples=3000, goal_bias=0.05, r=3.0, γ=6.0, distance=(x1, x2)->norm(x1-x2), goal_tolerance=0.5, cost_function=x->norm(x), heuristic=x->0)
+function KinoFMTStar(; n_samples=1000, goal_bias=0.05, r=3.0, γ=6.0, distance=(x1, x2)->norm(x1-x2), goal_tolerance=1.0, cost_function=x->norm(x), heuristic=x->0)
     # Make the base 
     base = base_planner(:KinoFMTStar, KinoFMTStarPlanner, [])
 
@@ -97,6 +100,10 @@ Key Algorithm Steps:
 4. Return path to goal if reached
 """
 function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
+
+    Random.seed!()
+
+
     T = typeof(problem.x0)
     U = typeof(zeros(problem.m))
     
@@ -116,7 +123,7 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
     valid(traj) = trajectory_validation(traj, problem, state_lower, state_upper)
     
     # Generate uniform samples
-    control_duration = 0.5  # TODO: parameterize
+    control_duration = 0.25  # TODO: parameterize 0.5
     V_unvisited = generate_kinodynamic_samples(problem, params, control_duration)
 
 
@@ -136,8 +143,6 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
     @info "Workspace bounds: $(problem.workspace.bounds)"
     @info "Number of obstacles: $(length(problem.workspace.obstacles))"
     @info "Start state: $(problem.x0)"
-
-    
     
     # Initialize sets
     V_open = Vector{KinoNode{T, U}}([start_node])
@@ -167,7 +172,7 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
         end
         
         # Select minimum cost node from OPEN
-        z = find_min_cost_node(V_open)
+        z = find_min_cost_node(V_open) # TODO switch to KD or Ball tree
         
         # Check if goal reached
         if goal_region(z.state)
@@ -177,8 +182,8 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
         end
         
         # Find nearby nodes in OPEN ∪ UNVISITED
-        X_near = find_nearby_nodes(params, z, V_open, V_unvisited, r_n)
-        num_neighbors = length(X_near)
+        X_near = find_nearby_nodes(params, z, V_open, V_unvisited, r_n) # TODO switch to KD or Ball tree
+        # num_neighbors = length(X_near)
         # @info "Iteration $iterations: Neighbors: $num_neighbors"
         
         # Move z: OPEN → CLOSED
@@ -190,13 +195,13 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
         # Try to connect nearby nodes
         for x in X_near
             # Find closed neighbors of x
-            N_x = find_closed_neighbors(params, x, V_closed, r_n)
+            N_x = find_closed_neighbors(params, x, V_closed, r_n) # TODO switch to KD or Ball tree
             
             if isempty(N_x)
                 continue
             end
             
-            # Find best parent via TPBVP solving
+            # Find best parent via TPBVP solving TODO thread canidates
             best_parent = find_best_kinodynamic_parent_proper(
                 problem, params, x, N_x, control_duration, valid
             )
@@ -227,11 +232,6 @@ function KinoFMTStarPlanner(problem::TPBVP, params::PlanningAlgorithm)
         @warn "No path found after $iterations iterations"
         return Solution([false], [problem.x0], [zeros(problem.m)], [[]])
     end
-
-    # # Bypass for testing
-    # sol = Solution([true], [problem.x0, problem.xT], [zeros(2), zeros(2)], [[]])
-
-    # return sol
 end
 
 
@@ -255,7 +255,7 @@ function find_best_kinodynamic_parent_proper(
     best_cost = Inf
     
     for parent in candidates
-        # Solve TPBVP: parent.state → target.state
+        # Solve TPBVP: parent.state → target.state TODO parallelize this
         connection = solve_tpbvp_informed(  # or use solve_tpbvp_sampling
             parent.state,
             target.state,
@@ -263,7 +263,7 @@ function find_best_kinodynamic_parent_proper(
             params,
             control_duration,
             n_attempts = 30,
-            distance_threshold = 1.0
+            distance_threshold = params.goal_tolerance
         )
         
         # Check if connection was successful

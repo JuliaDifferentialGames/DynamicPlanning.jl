@@ -21,9 +21,12 @@ This is the KEY difference from RRT-like approaches:
 function generate_kinodynamic_samples(
     problem::TPBVP, params::PlanningAlgorithm, control_duration::Float64
 )
+    # Control init 
+    zero_u = zeros(problem.m)
+
     # Extract types
     T = typeof(problem.x0)
-    U = typeof(zeros(problem.m))
+    U = typeof(zero_u)
     
     # State bounds
     state_lower, state_upper = get_bounds(problem, :x)
@@ -43,20 +46,28 @@ function generate_kinodynamic_samples(
     sample_count = 1
     attempts = 0
     max_attempts = params.n_samples #* 100
-    
-    while sample_count < params.n_samples && attempts < max_attempts
-        attempts += 1
-        
-        # CRITICAL: Sample uniformly in state space (not by propagation!)
-        x_sample = sample_uniform_state(state_lower, state_upper)
-        
-        # Only accept collision-free states
-        if valid_state(x_sample)
-            node = KinoNode(x_sample, zeros(problem.m), 0.0)
-            push!(samples, node)
-            sample_count += 1
+    N = params.n_samples
+    samples_per_thread = ceil(Int, N / nthreads())
+
+    # 2. Parallel sampling
+    thread_results = Vector{Vector{KinoNode{T,U}}}(undef, nthreads())
+
+    @threads for tid in 1:nthreads()
+        local_nodes = Vector{KinoNode{T,U}}()
+        attempts = 0
+        while length(local_nodes) < samples_per_thread && attempts < 10N
+            attempts += 1
+            x_sample = sample_uniform_state(state_lower, state_upper)
+            if valid_state(x_sample)
+                push!(local_nodes, KinoNode(x_sample, zero_u, 0.0))
+            end
         end
+        thread_results[tid] = local_nodes
     end
+
+    # 3. Combine and trim
+    all_samples = vcat(thread_results...)
+    samples = [start_node; all_samples[1:min(N-1, length(all_samples))]]
     
     @info "Generated $sample_count uniform kinodynamic samples in $attempts attempts"
     return samples
@@ -136,7 +147,7 @@ function simulate_forward(x0::Vector,
     control,
     dynamics::Function,
     duration::Float64;
-    n_steps::Int = 20)
+    n_steps::Int = 50)
 
     # Create control interp object 
     t = collect(0.0:duration/(n_steps-1):duration)

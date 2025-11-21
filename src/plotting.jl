@@ -104,7 +104,7 @@ function plot(problem::PlanningProblem, solution::Solution, label=true, text_siz
         ys = [robot.X[i][2] for i ∈ eachindex(robot.X)]
         
         scatter!([robot.X[1][1]], [robot.X[1][2]], label=nothing, color=i)
-        plot!(xs, ys, label="Path", color=i) 
+        plot!(xs, ys, label="Robot $i Path", color=i) 
         
 
         # Terminal state
