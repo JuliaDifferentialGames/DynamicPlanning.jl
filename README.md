@@ -6,6 +6,11 @@
 
 A Julia package for solving two-point boundary value problems (TPBVPs) via kinodynamic motion planning.
 
+> ⚠️ **Work in progress**
+>
+> This repository is actively being developed and the API, files, and examples may change without notice. Use at your own risk.
+
+
 ## Purpose
 DynamicPlanning.jl will provide fast, flexible implementations of baseline and cutting-edge asymptotically optimal kinodynamic motion planners with coming support for temporal logic.
 
