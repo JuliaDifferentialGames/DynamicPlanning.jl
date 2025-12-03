@@ -12,6 +12,7 @@ Resources Used:
 include("planning_algorithms/planning.jl")
 include("tasks/task.jl")
 include("constraints.jl")
+include("problems/planning_problem.jl")
 
 # Usings 
 using LazySets

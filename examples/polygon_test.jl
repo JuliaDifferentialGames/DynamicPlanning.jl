@@ -18,8 +18,6 @@ include("../src/sensors/gps.jl")
 include("../src/sensors/touch.jl")
 include("../src/models.jl")
 include("../src/solve.jl")
-#include("../src/problems/planning_problem.jl")
-include("../src/planning_algorithms/PassThrough.jl")
 
 # Usings 
 using LaTeXStrings
@@ -31,7 +29,8 @@ using LaTeXStrings
 
 
 # Define and add obstacles 
-𝒪 = create_pursuit_evasion_obstacles(𝒲)
+# 𝒪 = create_pursuit_evasion_obstacles(𝒲, seed=112358)
+
 
 add_obstacles!(𝒲, 𝒪)
 

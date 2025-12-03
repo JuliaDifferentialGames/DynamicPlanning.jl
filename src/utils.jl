@@ -153,8 +153,22 @@ function create_pursuit_evasion_obstacles(workspace;
             # Check separation from existing obstacles
             poly_center = mean(vertices_list(poly))
             
-            if isempty(obstacle_centers) || 
-               all(norm(poly_center - c) >= min_obstacle_separation for c in obstacle_centers)
+            # Check center-to-center separation
+            if !isempty(obstacle_centers) && 
+               !all(norm(poly_center - c) >= min_obstacle_separation for c in obstacle_centers)
+                continue
+            end
+            
+            # Check for intersections with existing obstacles
+            has_intersection = false
+            for existing_poly in obstacles
+                if !isdisjoint(poly, existing_poly)
+                    has_intersection = true
+                    break
+                end
+            end
+            
+            if !has_intersection
                 push!(obstacles, poly)
                 push!(obstacle_centers, poly_center)
                 placed = true
