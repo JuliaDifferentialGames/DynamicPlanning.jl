@@ -14,9 +14,8 @@ include("problems/planning_problem.jl")
 
 # Usings 
 using Plots 
+import Plots: plot  # Add this line
 using LaTeXStrings
-
-
 
 
 subscripts = Dict(
@@ -77,7 +76,7 @@ end
 """
 Solution plotting function
 """
-function plot(problem::PlanningProblem, solution::Solution, label=true, text_sizes=[7, 5])
+function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5])
     # Default plot function
     p = Plots.plot(aspectratio=1)
 
@@ -100,8 +99,8 @@ function plot(problem::PlanningProblem, solution::Solution, label=true, text_siz
     for (i, robot) ∈ enumerate(workspace.robots)
         # Nav goals 
         # Get xs and ys 
-        xs = [robot.X[i][1] for i ∈ eachindex(robot.X)]
-        ys = [robot.X[i][2] for i ∈ eachindex(robot.X)]
+        xs = [robot.X[j][1] for j ∈ eachindex(robot.X)]
+        ys = [robot.X[j][2] for j ∈ eachindex(robot.X)]
         
         scatter!([robot.X[1][1]], [robot.X[1][2]], label=nothing, color=i)
         plot!(xs, ys, label="Robot $i Path", color=i) 
@@ -117,6 +116,57 @@ function plot(problem::PlanningProblem, solution::Solution, label=true, text_siz
 
 
     plot!(p, xlims=:auto, ylims=:auto)
+
+
+    return p
+
+end
+
+
+
+
+"""
+Solution plotting function
+"""
+function plot(workspace::Workspace, solution::Solution, label=true, text_sizes=[7, 5], labels=["Pursuer", "Evader"])
+    # Default plot function
+    p = Plots.plot(aspectratio=1)
+
+    # Plot the workspace
+    plot!(p, workspace.bounds, c=:white)
+
+    # Plot the obstacles 
+    for (i, obstacle) ∈ enumerate(workspace.obstacles)
+        plot!(p, obstacle, c=:grey)
+    end
+
+    # Plot robot related stuff
+    for (i, robot) ∈ enumerate(workspace.robots)
+        # Nav goals 
+        # Get xs and ys 
+        xs = [solution.X[i][j][1] for j ∈ eachindex(solution.X[i])]
+        ys = [solution.X[i][j][2] for j ∈ eachindex(solution.X[i])]
+        
+        scatter!([robot.X[1][1]], [robot.X[1][2]], label=nothing, color=i)
+        plot!(xs, ys, label=labels[i], color=i) 
+        
+
+        # # Terminal state
+        # plot!(p, robot.shape, color=i)
+        # if label
+        #     center = solution.X[i][end][1:2]
+        #     annotate!(p, center[1], center[2], text(LaTeXString("$i"), text_sizes[2]))
+        # end
+    end
+
+
+    box = box_approximation(workspace.bounds)
+    l = low(box)
+    h = high(box)
+
+    plot!(xlims=[l[1], h[1]], ylims=[l[2], h[2]])
+    xlabel!(L"x")
+    ylabel!(L"y")
 
 
     return p

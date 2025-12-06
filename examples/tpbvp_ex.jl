@@ -33,17 +33,17 @@ include("../src/planning_algorithms/KinoFMTStar/KinoFMTStar.jl")
 add_obstacles!(𝒲, 𝒪)
 
 # Define the robot with a navigation task
-x0 = [0.0, -1.0, 0.0]
+x0_pursuer = [0.0, -5.0, 0.0]
+x0_evader = [0.5, -3.5, 0.0]
 xg1 = [4.0, 3.0, 0.0]
-xg2 = [0.0, 5.0, 0.0]
 
 # Define robot and it's constraints
-R1 = robot(x0, 3, 2, circle([0.0, 0.0], 0.25))
+R1 = robot(x0_pursuer, 3, 2, circle([0.0, 0.0], 0.25))
 add_dynamics!(R1, unicycle!)
 add_box_constraint!(R1, [-0.25, -pi/3], [0.25, pi/3], :u)
 add_box_constraint!(R1, [-10, -10, -pi/3], [10, 10, pi/3], :x)
 
-R2 = robot(xg1, 3, 2, circle([0.0, 0.0], 0.25))
+R2 = robot(x0_evader, 3, 2, circle([0.0, 0.0], 0.25))
 add_dynamics!(R2, unicycle!)
 add_box_constraint!(R2, [-0.25, -pi/3], [0.25, pi/3], :u)
 add_box_constraint!(R2, [-10, -10, -pi/3], [10, 10, pi/3], :x)
@@ -52,7 +52,7 @@ add_box_constraint!(R2, [-10, -10, -pi/3], [10, 10, pi/3], :x)
 nav_task_1 = navigation_task(xg1)
 add_tasks!(R1, [nav_task_1])
 
-nav_task_2 = navigation_task(xg2)
+nav_task_2 = navigation_task(xg1)
 add_tasks!(R2, [nav_task_2])
 
 # Configure the planning algorithm
@@ -71,4 +71,4 @@ sol = solve!(prob)
 
 # Plot 
 # plot(𝒲)
-plot(prob, sol)
+plot(prob)

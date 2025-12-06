@@ -61,11 +61,11 @@ function random_polygon(bounds; max_sides::Int=10, max_area::Float64=10.0,
         P = VPolygon(points)
 
         # 3. Scale area if necessary
-        A = area(P)
+        A = LazySets.area(P)
         if A > max_area
             scale_factor = sqrt(max_area / A)
             P = scale(P, scale_factor)
-            A = area(P)
+            A = LazySets.area(P)
         end
 
         # 4. Randomly translate polygon within bounds
@@ -145,7 +145,7 @@ function create_pursuit_evasion_obstacles(workspace;
                                  seed=0)  # Don't reset seed inside
             
             # Check area constraint
-            poly_area = area(poly)
+            poly_area = LazySets.area(poly)
             if poly_area < obstacle_min_area
                 continue  # Reject if too small
             end

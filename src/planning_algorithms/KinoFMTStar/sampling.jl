@@ -154,7 +154,7 @@ function simulate_forward(x0::Vector,
     ctrl = [linear_interpolation(t, control[i]*ones(size(t))) for i ∈ 1:2]
 
     prob = ODEProblem(dynamics, x0, (0.0, duration), ctrl)
-    sol = solve(prob, Tsit5(), adaptive=false, dt = duration / (n_steps - 1))
+    sol = DifferentialEquations.solve(prob, Tsit5(), adaptive=false, dt = duration / (n_steps - 1))
 
     trajectory = [sol.u[i] for i in 1:length(sol.u)]
     final_state = sol.u[end]
