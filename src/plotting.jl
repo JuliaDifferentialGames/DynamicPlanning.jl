@@ -18,6 +18,16 @@ import Plots: plot  # Add this line
 using LaTeXStrings
 
 
+"""
+Defines an n dimensional ball/circle
+"""
+function circle(center, radius)
+    n = length(center)
+    Ellipsoid(Vector{Float64}(center), Matrix((radius^2) * I, n, n))
+end
+
+
+
 subscripts = Dict(
     '0'=>'₀', '1'=>'₁', '2'=>'₂', '3'=>'₃', '4'=>'₄',
     '5'=>'₅', '6'=>'₆', '7'=>'₇', '8'=>'₈', '9'=>'₉'
@@ -76,7 +86,7 @@ end
 """
 Solution plotting function
 """
-function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5])
+function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5]; goals=[])
     # Default plot function
     p = Plots.plot(aspectratio=1)
 
@@ -84,7 +94,7 @@ function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5])
     workspace = problem.workspace
 
     # Plot the workspace
-    #plot!(p, workspace.bounds, c=:white)
+    plot!(p, workspace.bounds, c=:white)
 
     # Plot the obstacles 
     for (i, obstacle) ∈ enumerate(workspace.obstacles)
@@ -95,6 +105,8 @@ function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5])
         # end
     end
 
+    colors = [:blue, :red]
+
     # Plot robot related stuff
     for (i, robot) ∈ enumerate(workspace.robots)
         # Nav goals 
@@ -103,7 +115,7 @@ function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5])
         ys = [robot.X[j][2] for j ∈ eachindex(robot.X)]
         
         scatter!([robot.X[1][1]], [robot.X[1][2]], label=nothing, color=i)
-        plot!(xs, ys, label="Robot $i Path", color=i) 
+        plot!(xs, ys, label="Robot $i Path", color=colors[i]) 
         
 
         # Terminal state
@@ -115,7 +127,18 @@ function plot(problem::PlanningProblem, label=true, text_sizes=[7, 5])
     end
 
 
-    plot!(p, xlims=:auto, ylims=:auto)
+    box = box_approximation(workspace.bounds)
+    l = low(box)
+    h = high(box)
+
+    plot!(xlims=[l[1], h[1]], ylims=[l[2], h[2]])
+    xlabel!(L"x")
+    ylabel!(L"y")
+
+    plot!(circle(goals[1][1:2], 0.75), color=:green, alpha=0.25)
+    plot!(circle(goals[2][1:2], 0.75), color=:green, alpha=0.25)
+    # scatter!([goals[1][1]], [goals[1][2]], label=nothing, markershape = :star5, markersize = 7, color=:black)
+    # scatter!([goals[2][1]], [goals[112][2]], label=nothing, markershape = :star5, markersize = 7, color=:black)
 
 
     return p
