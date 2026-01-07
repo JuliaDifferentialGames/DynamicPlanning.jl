@@ -81,7 +81,7 @@ See `src/algorithms.jl` and the Nonlinear Landweber implementation in `src/solve
 If you use this package in your research, please cite:
 
 ```bibtex
-@software{iterativeregularization_jl,
+@software{dynamicplanning_jl,
   author = {Outland, Bennet},
   title = {DynamicPlanning.jl: Kinodynamic Motion Planning in Julia},
   year = {2025},
