@@ -71,5 +71,5 @@ function extract_kinodynamic_solution(goal_node::KinoNode{T, U}) where {T, U}
 
     sol = Solution([true], [states...], [controls...], [[]])
     
-    return sol #(states=states, controls=controls, durations=durations, trajectories=trajectories)
+    return sol 
 end
